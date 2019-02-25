@@ -17,4 +17,4 @@ To complete the task answer following questions save your changes and commit to 
    **Answer:** Push
 
 6. **Question:** How can you compare forks and apply changes to other's fork?  
-   **Answer:** Hasn't been told yet, I guess... However, I've found some informations on https://help.github.com/en/articles/comparing-commits-across-time: "To get to the compare view, append `/compare` to your repository's path.", but I'm not sure where, when or how it should work in our case.
+   **Answer:** Via "pull request"
