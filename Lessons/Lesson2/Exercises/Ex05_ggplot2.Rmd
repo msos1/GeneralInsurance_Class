@@ -12,7 +12,7 @@ library(ggplot2)
 > Load data if you have not done so yet:
 
 ```{r}
-dt_KPI <- read.csv("./Data/lesson2_KPI.csv")
+dt_KPI <- read.csv("C:\\Users\\Matej\\Documents\\github\\GeneralInsurance_Class\\Data\\lesson2_KPI.csv")
 ```
 
 
