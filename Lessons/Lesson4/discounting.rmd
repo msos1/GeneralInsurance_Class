@@ -51,9 +51,13 @@ library(ChainLadder)
 ```
 Load data about KPIs
 ```{r}
-dt_KPI <- read.csv("./Data/lesson2_KPI.csv")
+#setwd('C:\\Users\\Matej\\Documents\\github\\GeneralInsurance_Class')
+dt_KPI <- read.csv("./Data/lesson2_KPI.csv") 
+#dt_KPI <- read.csv("C:\\Users\\Matej\\Documents\\github\\GeneralInsurance_Class\\Data\\lesson2_KPI.csv")
 dt_LatestView <- read.csv("./Data/lesson4_latestView.csv")
+#dt_LatestView <- read.csv("C:\\Users\\Matej\\Documents\\github\\GeneralInsurance_Class\\Data\\lesson4_latestView.csv")
 dt_PaidCase <- read.csv("./Data/lesson4_PaidCase.csv")
+#dt_PaidCase <- read.csv("C:\\Users\\Matej\\Documents\\github\\GeneralInsurance_Class\\Data\\lesson4_PaidCase.csv")
 ```
 
 #### Exercise 1
@@ -80,9 +84,8 @@ _Now try to predict what happens with the linse using the chain ladder technique
 
 Your solution
 ```{r}
-
-
-
+chainladder(GenIns)
+predict(chainladder(GenIns))
 
 ```
 
@@ -98,38 +101,51 @@ Hint2: There are 2 types of data - paid and case. Start using Paid...
 _YOUR SOLUTION_
 understand the data => run some simple overviews
 
+```{r}
+summary(dt_PaidCase)
+# accident year
+# delay year
+```
+
+
 create a variable => filter data and covert to triangle. then convert to cummulative to use chainladder
 
 _STEP 1: Take paid data for House business and Small claim size_
 
 ```{r}
-Paid_HH_sml <- dt_PaidCase %>% filter(...) 
+Paid_HH_sml <- dt_PaidCase %>% filter(Business == 'House' & ClaimSize == 'Small' & dataset_type == 'PAID') 
+head(Paid_HH_sml)
 ```
 
 _STEP 2: Now convert the standard table into a triangle_
 Hint: %>% as.triangle(...)
 
 ```{r}
-
+Paid_HH_sml_triangle <- Paid_HH_sml %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
 ```
 
 _STEP 3: Now start plotting things to see more information_
 
 ```{r}
-
+Paid_HH_sml_triangle
+plot(Paid_HH_sml_triangle)
+plot(predict(chainladder(Paid_HH_sml_triangle)))
 ```
 
 _STEP 4: And get the aging factors and some other stat's out to see more details_
 Hint: ata(...)
 
 ```{r}
-
+ata(Paid_HH_sml_triangle)
 ```
 
 _Now repeat for all types of buiness and sizes of claims. Compare the findings..._
 
 ```{r}
-
+# Paid_HH_big <- 
+# Paid ... ... <- ...
+# ake rozne su jednotlive trojuholniky pre jednotlive skupiny...?
+# ktory biznis je short tail a ktory long tail? - DU ... teda ktory klesa casom a ktory rastie (trojuholnik)
 ```
 
 _If you are now comforatble with what this does, try doing the same, but using additional information: The Case data!_
