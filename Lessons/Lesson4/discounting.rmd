@@ -103,8 +103,8 @@ understand the data => run some simple overviews
 
 ```{r}
 summary(dt_PaidCase)
-# accident year
-# delay year
+# ay - accident year
+# dy - delay year
 ```
 
 
@@ -142,17 +142,70 @@ ata(Paid_HH_sml_triangle)
 _Now repeat for all types of buiness and sizes of claims. Compare the findings..._
 
 ```{r}
-# Paid_HH_big <- 
-# Paid ... ... <- ...
-# ake rozne su jednotlive trojuholniky pre jednotlive skupiny...?
-# ktory biznis je short tail a ktory long tail? - DU ... teda ktory klesa casom a ktory rastie (trojuholnik)
+# House, Large, Paid
+Paid_HH_Large <- dt_PaidCase %>% filter(Business == 'House' & ClaimSize == 'Large' & dataset_type == 'PAID') 
+Paid_HH_Large_triangle <- Paid_HH_Large %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
+Paid_HH_Large_triangle
+plot(Paid_HH_Large_triangle)
+plot(predict(chainladder(Paid_HH_Large_triangle)))
+ata(Paid_HH_Large_triangle)
+
+# 3rd Party, Small, Paid
+Paid_3rd_Small <- dt_PaidCase %>% filter(Business == '3rd Party' & ClaimSize == 'Small' & dataset_type == 'PAID') 
+Paid_3rd_Small_triangle <- Paid_3rd_Small %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
+Paid_3rd_Small_triangle
+plot(Paid_3rd_Small_triangle)
+plot(predict(chainladder(Paid_3rd_Small_triangle)))
+ata(Paid_3rd_Small_triangle)
+
+# 3rd Party, Large, Paid
+Paid_3rd_Large <- dt_PaidCase %>% filter(Business == '3rd Party' & ClaimSize == 'Large' & dataset_type == 'PAID') 
+Paid_3rd_Large_triangle <- Paid_3rd_Large %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
+Paid_3rd_Large_triangle
+plot(Paid_3rd_Large_triangle)
+plot(predict(chainladder(Paid_3rd_Large_triangle))) # Does not look good for the last one (number 0)... (Well, shitty math behind it, shitty results in return...)
+ata(Paid_3rd_Large_triangle)
+
+# The largest difference we can see is between House and 3rd Party Businesess in Small Claim Size - The graph for House is growing in first years, but stays pretty much constant in last years, while for 3rd Party is still growing in the last years (costs are growing in time)
+
+#P.S. I am not sure what the 'Hint' in README for the chainladder package means, hope I do not have this kind of problem, cause I do not see any... It works somehow (maybe)...
 ```
 
 _If you are now comforatble with what this does, try doing the same, but using additional information: The Case data!_
 Hint: Sum Paid and Case together to come up with the final claims estimates (the Incurred claims)
 
 ```{r}
+# House, Small, Paid + Case
+HH_sml <- dt_PaidCase %>% filter(Business == 'House' & ClaimSize == 'Small') 
+HH_sml_triangle <- HH_sml %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
+HH_sml_triangle
+plot(HH_sml_triangle)
+plot(predict(chainladder(HH_sml_triangle)))
+ata(HH_sml_triangle)
 
+# House, Large, Paid + Case
+HH_Large <- dt_PaidCase %>% filter(Business == 'House' & ClaimSize == 'Large') 
+HH_Large_triangle <- HH_Large %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
+HH_Large_triangle
+plot(HH_Large_triangle)
+plot(predict(chainladder(HH_Large_triangle)))
+ata(HH_Large_triangle)
+
+# 3rd Party, Small, Paid + Case
+ThirdParty_Small <- dt_PaidCase %>% filter(Business == '3rd Party' & ClaimSize == 'Small') 
+ThirdParty_Small_triangle <- ThirdParty_Small %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
+ThirdParty_Small_triangle
+plot(ThirdParty_Small_triangle)
+plot(predict(chainladder(ThirdParty_Small_triangle)))
+ata(ThirdParty_Small_triangle)
+
+# 3rd Party, Large, Paid + Case
+ThirdParty_Large <- dt_PaidCase %>% filter(Business == '3rd Party' & ClaimSize == 'Large') 
+ThirdParty_Large_triangle <- ThirdParty_Large %>% as.triangle(origin = 'ay', dev = 'dy', value = 'SumOfamount')
+ThirdParty_Large_triangle
+plot(ThirdParty_Large_triangle)
+plot(predict(chainladder(ThirdParty_Large_triangle)))
+ata(ThirdParty_Large_triangle)
 ```
 
 
@@ -161,11 +214,25 @@ In insurance this means how fast is the data fully developed. The age-to-age fac
 
 So hopefully by this time you know how the losses were calculated for you to use in previous class...
 
+```{r}
+# It takes about 4 years for Household business (buildings) losses to not change massively any further, while for the 3rd party business (cars) it may take longer 
+# The reason behind this might be the fact, that once something happens with your house, it's paid/reapired and there are no more additional costs. On the other hand, when a car accident occurs, it may take several years to fully reconvalescence from an injury, and so there can be another costs years after an accident.
+# Differences between Small and Large claim sizes are (as far as i am concerned) not so big. Maybe a slightly higher volatility for Large claim size predictions...
+
+# (...not sure if it's true, but we have the data and we have to say something about it...)
+```
+
 
 #### Exercise 3
 There are a couple of different types of business in the data from previous lesson. 
 What do you think, how long are the average delays in payments? Set up a table, that will 
 _show your assumptions and commit it to your git repository._
+
+```{r}
+summary(dt_KPI)
+# Travel, Packkaging, Accidents, Doctors, Criminals, Combined
+```
+
 
 
 ### Discounting  losses
@@ -173,6 +240,46 @@ It is very unlikely, that we incur the whole loss on the *very first day*. This 
 
 Let's check the data now. Were your expectations above supported by the calculation?
 Add comments to your notes if needed...
+
+```{r}
+# I am really not sure what's this all about... 'delays in payments'? ... but there's something:
+library(sqldf) 
+KPI_Travel <- sqldf("select Business, Year, sum(Losses) as Losses
+                    from dt_KPI
+                    where Business = 'Travel' 
+                    group by Year")
+KPI_Packaging <- sqldf("select Business, Year, sum(Losses) as Losses
+                    from dt_KPI
+                    where Business = 'Packkaging' 
+                    group by Year")
+KPI_Accidents <- sqldf("select Business, Year, sum(Losses) as Losses
+                    from dt_KPI
+                    where Business = 'Accidents' 
+                    group by Year")
+KPI_Doctors <- sqldf("select Business, Year, sum(Losses) as Losses
+                    from dt_KPI
+                    where Business = 'Doctors' 
+                    group by Year")
+KPI_Criminals <- sqldf("select Business, Year, sum(Losses) as Losses
+                    from dt_KPI
+                    where Business = 'Criminals' 
+                    group by Year")
+KPI_Combined <- sqldf("select Business, Year, sum(Losses) as Losses
+                    from dt_KPI
+                    where Business = 'Combined' 
+                    group by Year")
+
+library(plotly)
+plot_ly(x=~KPI_Travel$Year, y=~KPI_Travel$Losses, type="scatter", mode="markers+lines", name="Travel") %>%
+  add_trace(x=~KPI_Packaging$Year, y=~KPI_Packaging$Losses, type="scatter", mode="markers+lines", name="Packaging") %>% 
+  add_trace(x=~KPI_Accidents$Year, y=~KPI_Accidents$Losses, type="scatter", mode="markers+lines", name="Accidents") %>%
+  add_trace(x=~KPI_Doctors$Year, y=~KPI_Doctors$Losses, type="scatter", mode="markers+lines", text="Doctors") %>%
+  add_trace(x=~KPI_Criminals$Year, y=~KPI_Criminals$Losses, type="scatter", mode="markers+lines", name="Criminals") %>%
+  add_trace(x=~KPI_Combined$Year, y=~KPI_Combined$Losses, type="scatter", mode="markers+lines", name="Combined") %>%
+layout(title = "Year vs. Losses in Business types", xaxis = list(title="Year"), yaxis = list(title="Losses"))
+
+# ...not sure what is it good for, but ain't that a nice plot? ... I can do a lot of plots like this, but I am still not sure of what should have been done here...
+```
 
 
 #### Exercise 4
