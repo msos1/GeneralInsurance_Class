@@ -34,8 +34,8 @@ summary(dt_pol_w_claims$Capacity)
 # dt_pol_w_claims %>% filter(Capacity > 20000)
 
 # Let's take a GLM model with family "Gamma" (as we did during our last lesson), due to a fact, that Burning are closests to a Gamma distribution
-# First we take as our dependent variable Capacity 
-# We take only those with Burning costs from the interval (0, 100) to avoid outliers. We also take 
+# First, we take as our predictor variable Capacity 
+# We take only those with Burning costs from the interval (0, 100) to avoid outliers. 
 model1 <- glm(data = dt_pol_w_claims %>% filter(Burning_Cost != 0, Burning_Cost < 100), # (We might add some boundary to Capacity, but we aren't much into cars, so we don't know what might be the maximum or minimum value for Capacity)
               formula = Burning_Cost ~ Capacity,
               family = Gamma())
